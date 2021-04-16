@@ -1,8 +1,9 @@
 # plutosdr-dev
 
 <img align="right" width="200" src="https://wiki.analog.com/_media/university/tools/pluto/pluto_in_hand.png">
+
 This repository allows you to modify the [ADALM-PLUTO](https://wiki.analog.com/university/tools/pluto) 
-firmware without mocking changing the submodules of the Analog Devices [plutosdr-fw](https://github.com/analogdevicesinc/plutosdr-fw.git)
+firmware without changing the submodules of the Analog Devices [plutosdr-fw](https://github.com/analogdevicesinc/plutosdr-fw.git)
 repository. The build script is completely rewritten and made faster with the following features:
 
 * The FPGA code can be modified and built in the plutosdr-dev directory.
