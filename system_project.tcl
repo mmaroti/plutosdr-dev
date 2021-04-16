@@ -1,5 +1,5 @@
 
-source ../scripts/adi_env.tcl
+source $::env(PLUTOSDR_FW)/hdl/projects/scripts/adi_env.tcl
 source $ad_hdl_dir/projects/scripts/adi_project_xilinx.tcl
 source $ad_hdl_dir/projects/scripts/adi_board.tcl
 
@@ -13,5 +13,6 @@ adi_project_files pluto [list \
 
 set_property is_enabled false [get_files  *system_sys_ps7_0.xdc]
 adi_project_run pluto
-source $ad_hdl_dir/library/axi_ad9361/axi_ad9361_delay.tcl
 
+# comment this out if you run into issues with timing analysis
+source $ad_hdl_dir/library/axi_ad9361/axi_ad9361_delay.tcl
