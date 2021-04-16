@@ -29,7 +29,15 @@ all: build/pluto.dfu
 clean:
 	rm -rf build
 
-.PHONY: all clear dfu-ram linux-menuconfig build-menuconfig FORCE
+clean-all: clean
+	$(MAKE) -C $(PLUTOSDR_FW) clean
+	cd $(PLUTOSDR_FW)/linux && git clean -fx
+	cd $(PLUTOSDR_FW)/buildroot && git clean -fx
+	cd $(PLUTOSDR_FW)/hdl && git clean -fx
+	cd $(PLUTOSDR_FW)/u-boot-xilinx && git clean -fx
+	cd $(PLUTOSDR_FW)/hdl && git clean -fx
+
+.PHONY: all clean dfu-ram linux-menuconfig build-menuconfig FORCE
 
 FORCE:
 
@@ -44,7 +52,7 @@ PLUTO_FILES := system_project.tcl system_bd.tcl system_top.v system_constr.xdc
 $(PLUTOSDR_FW)/hdl/library/%/component.xml:
 	$(MAKE) -C $(dir $@) -j1 xilinx
 
-build/pluto.runs/impl_1/system_top.sysdef: $(PLUTO_FILES) | build
+build/pluto.runs/impl_1/system_top.sysdef: $(PLUTO_FILES) $(foreach lib,$(PLUTO_LIBS),$(PLUTOSDR_FW)/hdl/library/$(lib)/component.xml) | build
 	cp -fa $(PLUTO_FILES) build
 	cd build && vivado -mode batch -source system_project.tcl
 
@@ -76,13 +84,13 @@ build/zImage: $(PLUTOSDR_FW)/linux/arch/arm/boot/zImage | build
 	cp -fa $< $@
 
 build/%.dtb: | build
-	make -C $(PLUTOSDR_FW)/linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) $(notdir $@)
+	$(MAKE) -C $(PLUTOSDR_FW)/linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) $(notdir $@)
 	cp -fa $(PLUTOSDR_FW)/linux/arch/arm/boot/dts/$(notdir $@) $@
 
 # buildroot
 
 VERSION_OLD = $(shell test -f build/VERSIONS && head -n 1 build/VERSIONS)
-VERSION_NEW = device-fw $(shell git describe --dirty --always --tags)
+VERSION_NEW = device-fw plutosdr-dev-$(shell git describe --dirty --always --tags)
 
 build/VERSIONS: FORCE | build
 ifneq ($(VERSION_OLD), $(VERSION_NEW))
@@ -100,9 +108,14 @@ $(PLUTOSDR_FW)/buildroot/.config:
 buildroot-menuconfig:
 	$(MAKE) -C $(PLUTOSDR_FW)/buildroot ARCH=arm menuconfig
 
-$(PLUTOSDR_FW)/buildroot/output/images/rootfs.cpio.gz: $(PLUTOSDR_FW)/buildroot/.config build/VERSIONS
+$(PLUTOSDR_FW)/buildroot/board/pluto/msd/LICENSE.html: $(PLUTOSDR_FW)/buildroot/.config
+	echo "<!DOCTYPE html><html><head>" > $@
+	echo "<meta http-equiv='refresh' content='1;url=https://wiki.analog.com/university/tools/pluto'/>" >> $@
+	echo "</head></html>" >> $@
+
+$(PLUTOSDR_FW)/buildroot/output/images/rootfs.cpio.gz: $(PLUTOSDR_FW)/buildroot/.config $(PLUTOSDR_FW)/buildroot/board/pluto/msd/LICENSE.html build/VERSIONS
 	cp -fa build/VERSIONS $(PLUTOSDR_FW)/buildroot/board/pluto/VERSIONS
-	make -C $(PLUTOSDR_FW)/buildroot -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C $(PLUTOSDR_FW)/buildroot -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) BUSYBOX_CONFIG_FILE=$(PLUTOSDR_FW)/buildroot/board/pluto/busybox-1.25.0.config all
 
 build/rootfs.cpio.gz: $(PLUTOSDR_FW)/buildroot/output/images/rootfs.cpio.gz | build
 	cp -fa $< $@
@@ -110,8 +123,8 @@ build/rootfs.cpio.gz: $(PLUTOSDR_FW)/buildroot/output/images/rootfs.cpio.gz | bu
 # pluto.dfu
 
 $(PLUTOSDR_FW)/u-boot-xlnx/tools/mkimage:
-	make -C $(PLUTOSDR_FW)/u-boot-xlnx ARCH=arm zynq_pluto_defconfig
-	make -C $(PLUTOSDR_FW)/u-boot-xlnx -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE)
+	$(MAKE) -C $(PLUTOSDR_FW)/u-boot-xlnx ARCH=arm zynq_pluto_defconfig
+	$(MAKE) -C $(PLUTOSDR_FW)/u-boot-xlnx -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE)
 
 build/pluto.its: $(PLUTOSDR_FW)/scripts/pluto.its | build
 	cp -fa $< $@
@@ -132,6 +145,6 @@ build/pluto.dfu: build/pluto.itb
 
 dfu-ram: build/pluto.dfu
 	sshpass -p analog ssh root@pluto '/usr/sbin/device_reboot ram;'
-	sleep 7
+	sleep 6
 	dfu-util -D build/pluto.dfu -a firmware.dfu
 	dfu-util -e -a firmware.dfu
