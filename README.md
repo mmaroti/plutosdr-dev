@@ -33,7 +33,7 @@ The code is released under its original license. It was tested on plutosdr-fw ve
 ## Issues
 
 * If you encounter the
-`WARNING: [Vivado 12-508] No pins matched 'get_pins -hierarchical -filter {NAME =~ *i_rx_data_iddr/C || NAME =~ *i_rx_data_iddr/D}'`, then you have probably deleted the untracked git file `plutosdr-fw-orig/hdl/library/axi_ad9361/bd/bd.tcl` making the repository dirty. This file is generated and should have been listed in their `.gitignore`. Just clean the `axi_ad9361` library with `make clean` in that folder and it will be regenerated.
+`WARNING: [Vivado 12-508] No pins matched 'get_pins -hierarchical -filter {NAME =~ *i_rx_data_iddr/C || NAME =~ *i_rx_data_iddr/D}'`, then you have probably deleted the untracked git file `plutosrd-fw/hdl/library/axi_ad9361/bd/bd.tcl` making the repository dirty. This file is generated and should have been listed in their `.gitignore`. Just clean the `axi_ad9361` library with `make clean` in that folder and it will be regenerated.
 
 * Currently only the `pluto.dfu` is generated and the bootloaders are not. You do not need to touch the bootloaders, or just use the original repository. I am not responsible for the use of this library if you 
 damage your Pluto. I recommend to program your Pluto with the `make dfu-ram` command. Just unplug it afterwards and it will be restored to its original firmware.
