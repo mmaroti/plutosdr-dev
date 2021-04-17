@@ -34,8 +34,7 @@ clean-all: clean
 	cd $(PLUTOSDR_FW)/linux && git clean -fx
 	cd $(PLUTOSDR_FW)/buildroot && git clean -fx
 	cd $(PLUTOSDR_FW)/hdl && git clean -fx
-	cd $(PLUTOSDR_FW)/u-boot-xilinx && git clean -fx
-	cd $(PLUTOSDR_FW)/hdl && git clean -fx
+	cd $(PLUTOSDR_FW)/u-boot-xlnx && git clean -fx
 
 .PHONY: all clean dfu-ram linux-menuconfig build-menuconfig FORCE
 
@@ -140,6 +139,7 @@ build/pluto.dfu: build/pluto.itb
 	cp $< $<.tmp
 	dfu-suffix -a $<.tmp -v $(DEVICE_VID) -p $(DEVICE_PID)
 	mv $<.tmp $@
+	@echo "*** DONE, please run make dfu-ram to program ***"
 
 # programming
 
