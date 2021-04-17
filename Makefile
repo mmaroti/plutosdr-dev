@@ -82,9 +82,11 @@ $(PLUTOSDR_FW)/linux/arch/arm/boot/zImage: $(PLUTOSDR_FW)/linux/.config
 build/zImage: $(PLUTOSDR_FW)/linux/arch/arm/boot/zImage | build
 	cp -fa $< $@
 
-build/%.dtb: | build
-	$(MAKE) -C $(PLUTOSDR_FW)/linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) $(notdir $@)
-	cp -fa $(PLUTOSDR_FW)/linux/arch/arm/boot/dts/$(notdir $@) $@
+build/zynq-pluto-sdr.dtb: $(PLUTOSDR_FW)/linux/arch/arm/boot/zImage | build
+	$(MAKE) -C $(PLUTOSDR_FW)/linux -j $(NCORES) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) zynq-pluto-sdr.dtb zynq-pluto-sdr-revb.dtb zynq-pluto-sdr-revc.dtb
+	cp -fa $(PLUTOSDR_FW)/linux/arch/arm/boot/dts/zynq-pluto-sdr-revc.dtb build
+	cp -fa $(PLUTOSDR_FW)/linux/arch/arm/boot/dts/zynq-pluto-sdr-revb.dtb build
+	cp -fa $(PLUTOSDR_FW)/linux/arch/arm/boot/dts/zynq-pluto-sdr.dtb build
 
 # buildroot
 
@@ -128,7 +130,7 @@ $(PLUTOSDR_FW)/u-boot-xlnx/tools/mkimage:
 build/pluto.its: $(PLUTOSDR_FW)/scripts/pluto.its | build
 	cp -fa $< $@
 
-build/pluto.itb: $(PLUTOSDR_FW)/u-boot-xlnx/tools/mkimage build/pluto.its build/zImage build/rootfs.cpio.gz build/system_top.bit build/zynq-pluto-sdr.dtb build/zynq-pluto-sdr-revb.dtb build/zynq-pluto-sdr-revc.dtb
+build/pluto.itb: $(PLUTOSDR_FW)/u-boot-xlnx/tools/mkimage build/pluto.its build/zImage build/rootfs.cpio.gz build/system_top.bit build/zynq-pluto-sdr.dtb
 	cd build && $(PLUTOSDR_FW)/u-boot-xlnx/tools/mkimage -f pluto.its pluto.itb
 
 build/pluto.frm: build/pluto.itb
