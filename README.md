@@ -29,6 +29,7 @@ The code is released under its original license. It was tested on plutosdr-fw ve
 
 * https://wiki.analog.com/university/tools/pluto
 * https://gitlab.com/librespacefoundation/sdrmakerspace/radtest/-/wikis/ADALM-Pluto-sdr
+* https://youtu.be/bZO697Qk44g
 
 ## Issues
 
